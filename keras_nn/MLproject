@@ -1,0 +1,7 @@
+name: Keras ANN
+
+conda_env: keras.yaml
+
+entry_points:
+    main:
+        command: "python keras_train.py"

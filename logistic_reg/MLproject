@@ -1,0 +1,7 @@
+name: Logistic Regression
+
+conda_env: log_reg.yaml
+
+entry_points:
+    main:
+        command: "python logistic_reg_train.py"

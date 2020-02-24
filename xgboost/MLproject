@@ -1,0 +1,7 @@
+name: linreg
+
+conda_env: xgboost.yaml
+
+entry_points:
+    main:
+        command: "python xgboost_train.py"
