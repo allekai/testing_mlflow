@@ -1,24 +1,44 @@
-# Load training and test datasets
-import xgboost as xgb
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from mlflow import log_metric
+from mlflow.xgboost import log_model, save_model
 
-if __name__ == "__main__":
+import mlflow
+import xgboost as xgb
+
+
+if __name__ == '__main__':
+    remote_server_uri = 'http://127.0.0.1:1234'  # set to your server URI
+
+    # Make sure to also set environment variable MLFLOW_TRACKING_URI='remote_server_uri'
+    # see: https://github.com/mlflow/mlflow/issues/608#issuecomment-454316004
+    mlflow.set_tracking_uri(remote_server_uri)
+    conda_env = 'xgboost.yaml'
+    
     iris = datasets.load_iris()
-    x = iris.data[:, 2:]
+    x = iris.data
     y = iris.target
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(x, y,
+                                                        test_size=0.2,
+                                                        random_state=42)
     dtrain = xgb.DMatrix(x_train, label=y_train)
+    
+    with mlflow.start_run():
+        # Train and save an XGBoost model
+        xgb_model = xgb.XGBClassifier()
+        xgb_model.fit(x_train, y_train)
+
+        test_predictions = xgb_model.predict(x_test)
 
 
-    # Train and save an XGBoost model
-    xgb_model = xgb.train(params={'max_depth': 10}, dtrain=dtrain, num_boost_round=10)
+        log_metric('acc', accuracy_score(y_test, test_predictions))
 
-    # Evaluate the model
-    import pandas as pd
-    test_predictions = xgb_model.predict(xgb.DMatrix(x_test))
+        log_model(xgb_model=xgb_model,
+                registered_model_name='XGBoost-Iris-Model',
+                artifact_path='model_artifact',
+                conda_env=conda_env)
+        save_model(xgb_model,
+                mlflow.get_artifact_uri() + "/XGB_MLflow_Model",
+                conda_env)
 
-
-    log_metric('acc', accuracy_score(y_test, predictions))
