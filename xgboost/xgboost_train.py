@@ -2,7 +2,7 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from mlflow import log_metric
-from mlflow.xgboost import log_model, save_model
+from mlflow.xgboost import log_model
 
 import mlflow
 import xgboost as xgb
@@ -38,7 +38,4 @@ if __name__ == '__main__':
                 registered_model_name='XGBoost-Iris-Model',
                 artifact_path='model_artifact',
                 conda_env=conda_env)
-        save_model(xgb_model,
-                mlflow.get_artifact_uri() + "/XGB_MLflow_Model",
-                conda_env)
 
